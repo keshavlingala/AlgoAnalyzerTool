@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QComboBox
 from PyQt5.QtWidgets import QWidget, QTextEdit, QCheckBox, QPlainTextEdit, QPushButton
+from qt_material import apply_stylesheet, list_themes
 
 
 class SortingApp(QWidget):
@@ -8,9 +8,12 @@ class SortingApp(QWidget):
         super().__init__()
         layout = QVBoxLayout()
 
+        apply_stylesheet(self, theme='dark_pink.xml')
+
         # 1. Text box with padding
         self.text_box = QTextEdit(self)
-        self.text_box.setPlaceholderText("Enter your text here...")
+
+        self.text_box.setPlaceholderText("Enter a list of numbers to sort, and analyze their efficiency.")
         layout.addWidget(self.text_box)
 
         # 2. List of checkboxes with sorting algorithms
@@ -20,7 +23,6 @@ class SortingApp(QWidget):
             checkbox = QCheckBox(algo["name"], self)
             self.checkboxes[algo["id"]] = checkbox
             layout.addWidget(checkbox)
-
         # Button that will run a function when clicked
         self.run_button = QPushButton("Run Algorithms", self)
         layout.addWidget(self.run_button)
@@ -35,6 +37,12 @@ class SortingApp(QWidget):
         self.log_box = QPlainTextEdit(self)
         self.log_box.setReadOnly(True)
         layout.addWidget(self.log_box)
+
+        # Add Theme Dropdown
+        self.theme = QComboBox(self)
+        self.theme.addItems(list_themes())
+        self.theme.currentTextChanged.connect(lambda x: apply_stylesheet(self, theme=x))
+        layout.addWidget(self.theme)
 
         self.setLayout(layout)
         self.setWindowTitle("Algorithms Efficiency Analyzer Tool")

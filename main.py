@@ -359,40 +359,43 @@ all_algorithms = [
 
 #  Visualizations Utils
 
-
-def analyze_visualization(input_array):
-    sorting_algo = list(map(lambda algo: algo['name'], all_algorithms))
-    efficiency_list = []
-    for selected_algorithm in all_algorithms:
-        output, efficiency = measure_efficiency(selected_algorithm['instance'], input_array)
-        efficiency_list.append(efficiency)
-
-    data = [float(val) for val in efficiency_list]
+def show_visualization(labels, data):
     # Create a figure with two subplots
     fig, (plt1, plt2) = plt.subplots(1, 2, figsize=(11, 8))
 
     # Plot the line chart on the first subplot (plt1)
-    plt1.plot(sorting_algo, data, marker='o', linestyle='-')
+    plt1.plot(labels, data, marker='o', linestyle='-')
     plt1.set_ylabel('Time in Seconds')
     plt1.set_title('Efficiency of Algorithms')
 
-     # Plot the bar graph on the second subplot (plt2)
-    plt2.bar(sorting_algo, data, color="maroon")
+    # Plot the bar graph on the second subplot (plt2)
+    plt2.bar(labels, data, color="maroon")
     plt2.set_ylabel('Time in Seconds')
     plt2.set_title('Efficiency of Algorithms (Bar Graph)')
 
     # Customize the appearance as needed
     plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
     plt.tight_layout()  # Ensure labels are not cut off
-    for x, y in zip(sorting_algo, data):
+    for x, y in zip(labels, data):
         plt1.annotate(f'{y:6f}', (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
     # Add labels to each bar
-    for x, y in zip(sorting_algo, data):
+    for x, y in zip(labels, data):
         plt2.annotate(f'{y:6f}', (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
 
     # Show the plots
     plt.show()
     return 0
+
+
+def analyze_visualization(input_array):
+    labels = list(map(lambda algo: algo['name'], all_algorithms))
+    efficiency_list = []
+    for selected_algorithm in all_algorithms:
+        output, efficiency = measure_efficiency(selected_algorithm['instance'], input_array)
+        efficiency_list.append(efficiency)
+
+    data = [float(val) for val in efficiency_list]
+    show_visualization(labels, data)
 
 
 def run_callback(args):
@@ -406,9 +409,12 @@ def run_callback(args):
     for id, checkbox in gui.get_checkboxes().items():
         if checkbox.isChecked():
             # find the algorithm from id
-            logger("Running " + all_algorithms[id]['name'] + " algorithm")
-            sorted_elements = all_algorithms[id]['instance'].sort(nums)
-            logger("Sorted elements are " + str(sorted_elements))
+            sorted_elements, efficiency = all_algorithms[id]['instance'].sort(nums)
+            logger(f"--------------------{id}----------------------------")
+            logger("Algorithm: " + all_algorithms[id]['name'])
+            logger(f"Sorted Elements: {sorted_elements}")
+            logger(f"Time Taken: {efficiency}")
+            logger("--------------------------------------------------")
 
 
 def analyze_callback(args):
@@ -421,7 +427,10 @@ def analyze_callback(args):
 
 
 def show_stats_callback(args):
-    logger(f"Show Stats button clicked from {args}")
+    text = gui.get_input_text()
+    if not is_valid_input(gui.get_input_text()):
+        logger("Please enter valid input")
+        return
 
 
 if __name__ == '__main__':
