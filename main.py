@@ -11,9 +11,9 @@ from gui import SortingApp
 #  utils functions
 def time_it(func):
     def wrapper(*args, **kwargs):
-        start = time.time()
+        start = time.perf_counter()
         result = func(*args, **kwargs)
-        logger(f"Time taken by {func.__name__}: {time.time() - start}")
+        logger(f"Time taken by {func.__name__}: {time.perf_counter() - start}")
         return result
 
     return wrapper
@@ -104,19 +104,19 @@ class SortingAlgorithm:
 
 class InsertionSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         for i in range(1, len(array)):
             j = i
             while j > 0 and array[j] < array[j - 1]:
                 self.swap(j, j - 1, array)
                 j -= 1
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
 
 class BubbleSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         isSorted = False
         counter = 0
         while not isSorted:
@@ -126,15 +126,15 @@ class BubbleSort(SortingAlgorithm):
                     self.swap(i, i + 1, array)
                     isSorted = False
             counter += 1
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
 
 class QuickSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         self.quickSortHelper(array, 0, len(array) - 1)
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
     def quickSortHelper(self, array, startIdx, endIdx):
@@ -162,12 +162,12 @@ class QuickSort(SortingAlgorithm):
 
 class MergeSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         if len(array) <= 1:
             return array, 0.0
         auxiliaryArray = array[:]
         self.mergeSortHelper(array, 0, len(array) - 1, auxiliaryArray)
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
     def mergeSortHelper(self, mainArray, startIdx, endIdx, auxiliaryArray):
@@ -202,7 +202,7 @@ class MergeSort(SortingAlgorithm):
 
 class CountingSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         max_value = max(array)
         min_value = min(array)
         range_of_elements = max_value - min_value + 1
@@ -222,18 +222,18 @@ class CountingSort(SortingAlgorithm):
         for i in range(len(array)):
             array[i] = output_array[i]
 
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
 
 class HeapSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         self.build_max_heap(array)
         for i in range(len(array) - 1, 0, -1):
             self.swap(0, i, array)
             self.max_heap(array, index=0, size=i)
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
     def build_max_heap(self, array):
@@ -266,17 +266,17 @@ class SelectionSort(SortingAlgorithm):
         return min_index
 
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         for i in range(len(array)):
             min_index = self.find_min_index(array, i)
             self.swap(i, min_index, array)
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
 
 class RadixSort(SortingAlgorithm):
     def sort(self, array):
-        start_time = time.time()
+        start_time = time.perf_counter()
         max_value = max(array, key=abs)
         num_digits = int(math.log10(abs(max_value))) + 1 if max_value != 0 else 1
 
@@ -285,7 +285,7 @@ class RadixSort(SortingAlgorithm):
             sorted_array, _ = counting_sort.sort(array)
             array = sorted_array
 
-        end_time = time.time()
+        end_time = time.perf_counter()
         return array, end_time - start_time
 
 
@@ -368,35 +368,29 @@ def analyze_visualization(input_array):
         efficiency_list.append(efficiency)
 
     data = [float(val) for val in efficiency_list]
+    # Create a figure with two subplots
+    fig, (plt1, plt2) = plt.subplots(1, 2, figsize=(11, 8))
 
-    # Clear the current plot
-    plt.clf()
+    # Plot the line chart on the first subplot (plt1)
+    plt1.plot(sorting_algo, data, marker='o', linestyle='-')
+    plt1.set_ylabel('Time in Seconds')
+    plt1.set_title('Efficiency of Algorithms')
 
-    # Create the plot
-    plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
-    plt.plot(sorting_algo, data, marker='o', linestyle='-')
-    plt.xlabel('Algorithms')
-    plt.ylabel('Time in Seconds')
-    plt.title('Efficiency of Sorting Algorithms')
+     # Plot the bar graph on the second subplot (plt2)
+    plt2.bar(sorting_algo, data, color="maroon")
+    plt2.set_ylabel('Time in Seconds')
+    plt2.set_title('Efficiency of Algorithms (Bar Graph)')
 
-    # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha='right')  # Rotate by 45 degrees and align to the right
-    # Set the y-axis limits with a specified interval
-    y_min = min(data)
-    y_max = max(data)
-    y_interval = 0.000010
-    plt.ylim(y_min - y_interval, y_max + y_interval)
-
-    # Label data points on the graph
-    for x, y in zip(sorting_algo, data):
-        plt.annotate(f'{y:6f}', (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
-
-    # Show the plot
+    # Customize the appearance as needed
+    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
     plt.tight_layout()  # Ensure labels are not cut off
-    plt.plot(sorting_algo, data)
-    plt.xlabel('Algorithms')
-    plt.ylabel('Time in Seconds')
-    plt.title('Efficiency of Algorithms')
+    for x, y in zip(sorting_algo, data):
+        plt1.annotate(f'{y:6f}', (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
+    # Add labels to each bar
+    for x, y in zip(sorting_algo, data):
+        plt2.annotate(f'{y:6f}', (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
+
+    # Show the plots
     plt.show()
     return 0
 
