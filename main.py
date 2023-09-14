@@ -361,16 +361,20 @@ all_algorithms = [
 
 def show_visualization(labels, data):
     # Create a figure with two subplots
-    fig, (plt1, plt2) = plt.subplots(1, 2, figsize=(11, 8))
+    fig, (plt1, plt2) = plt.subplots(1, 2, figsize=(15, 8))
 
     # Plot the line chart on the first subplot (plt1)
     plt1.plot(labels, data, marker='o', linestyle='-')
     plt1.set_ylabel('Time in Seconds')
+    plt1.set_xticks(labels)
+    plt1.set_xticklabels(labels, rotation=45, ha='right')
     plt1.set_title('Efficiency of Algorithms')
 
     # Plot the bar graph on the second subplot (plt2)
     plt2.bar(labels, data, color="maroon")
     plt2.set_ylabel('Time in Seconds')
+    plt2.set_xticks(labels)  # Ensure all labels are shown
+    plt2.set_xticklabels(labels, rotation=45, ha='right')
     plt2.set_title('Efficiency of Algorithms (Bar Graph)')
 
     # Customize the appearance as needed

@@ -1,5 +1,8 @@
-from PyQt5.QtWidgets import QVBoxLayout, QComboBox
+from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QDialog, QVBoxLayout
 from PyQt5.QtWidgets import QWidget, QTextEdit, QCheckBox, QPlainTextEdit, QPushButton
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from qt_material import apply_stylesheet, list_themes
 
 
@@ -13,7 +16,8 @@ class SortingApp(QWidget):
         # 1. Text box with padding
         self.text_box = QTextEdit(self)
 
-        self.text_box.setPlaceholderText("Enter a list of numbers to sort, and analyze their efficiency.")
+        self.text_box.setPlaceholderText(
+            "Enter a list of numbers to sort, and analyze their efficiency. ( Comma Separated or Space Separated )")
         layout.addWidget(self.text_box)
 
         # 2. List of checkboxes with sorting algorithms
@@ -87,3 +91,19 @@ class SortingApp(QWidget):
 
     def on_show_stats_button_clicked(self, callback):
         self.show_stats.clicked.connect(callback)
+
+    def show_plot_dialog_with_figure(self, fig):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Plot Dialog")
+
+        layout = QVBoxLayout()
+
+        # Embed the Matplotlib figure into the dialog
+        canvas = FigureCanvas(fig)
+        navBar = NavigationToolbar(canvas, dialog)
+
+        layout.addWidget(navBar)
+        layout.addWidget(canvas)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
