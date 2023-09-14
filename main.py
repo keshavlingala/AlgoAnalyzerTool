@@ -1,7 +1,9 @@
+import math
 import sys
 import time
 
 from PyQt5.QtWidgets import QApplication
+from matplotlib import pyplot as plt
 
 from gui import SortingApp
 
@@ -15,6 +17,26 @@ def time_it(func):
         return result
 
     return wrapper
+
+
+def is_valid_input(text):
+    if not text:
+        return False
+    try:
+        list(map(int, text.split()))
+        return True
+    except ValueError:
+        return False
+
+
+def parse_input(text):
+    text = text.replace(',', ' ')
+    return list(map(int, text.split()))
+
+
+def measure_efficiency(sorting_algorithm, input_array):
+    sorted_array, execution_time = sorting_algorithm.sort(input_array.copy())
+    return sorted_array, execution_time
 
 
 # static Functions
@@ -72,176 +94,199 @@ def partition(array, low, high):
 # Algorithms
 
 class SortingAlgorithm:
+
+    def swap(self, i, j, array):
+        swap(i, j, array)
+
     def sort(self, array):
         pass
 
-    def has_limitation(self):
-        return False
+
+class InsertionSort(SortingAlgorithm):
+    def sort(self, array):
+        start_time = time.time()
+        for i in range(1, len(array)):
+            j = i
+            while j > 0 and array[j] < array[j - 1]:
+                self.swap(j, j - 1, array)
+                j -= 1
+        end_time = time.time()
+        return array, end_time - start_time
 
 
 class BubbleSort(SortingAlgorithm):
-    @time_it
     def sort(self, array):
-        for i in range(len(array)):
-            for j in range(len(array) - 1):
-                if array[j] > array[j + 1]:
-                    swap(j, j + 1, array)
-        return array
-
-
-class SelectionSort(SortingAlgorithm):
-    @time_it
-    def sort(self, array):
-        for i in range(len(array)):
-            min_index = i
-            for j in range(i + 1, len(array)):
-                if array[j] < array[min_index]:
-                    min_index = j
-            swap(i, min_index, array)
-        return array
-
-
-class InsertionSort(SortingAlgorithm):
-    @time_it
-    def sort(self, array):
-        for i in range(1, len(array)):
-            key = array[i]
-            j = i - 1
-            while j >= 0 and key < array[j]:
-                array[j + 1] = array[j]
-                j -= 1
-            array[j + 1] = key
-        return array
-
-
-class MergeSort(SortingAlgorithm):
-
-    @time_it
-    def sort(self, array):
-        self.merge_sort(array, 0, len(array) - 1)
-        return array
-
-    def merge_sort(self, array, l, r):
-        if l < r:
-            m = (l + r) // 2
-            self.merge_sort(array, l, m)
-            self.merge_sort(array, m + 1, r)
-            merge(array, l, m, r)
+        start_time = time.time()
+        isSorted = False
+        counter = 0
+        while not isSorted:
+            isSorted = True
+            for i in range(len(array) - 1 - counter):
+                if array[i] > array[i + 1]:
+                    self.swap(i, i + 1, array)
+                    isSorted = False
+            counter += 1
+        end_time = time.time()
+        return array, end_time - start_time
 
 
 class QuickSort(SortingAlgorithm):
-    @time_it
     def sort(self, array):
-        self.quick_sort(array, 0, len(array) - 1)
-        return array
+        start_time = time.time()
+        self.quickSortHelper(array, 0, len(array) - 1)
+        end_time = time.time()
+        return array, end_time - start_time
 
-    def quick_sort(self, array, low, high):
-        if low < high:
-            pi = partition(array, low, high)
-            self.quick_sort(array, low, pi - 1)
-            self.quick_sort(array, pi + 1, high)
+    def quickSortHelper(self, array, startIdx, endIdx):
+        if startIdx >= endIdx:
+            return
+        pivotIdx = startIdx
+        leftIdx = startIdx + 1
+        rightIdx = endIdx
+        while rightIdx >= leftIdx:
+            if array[leftIdx] > array[pivotIdx] and array[rightIdx] < array[pivotIdx]:
+                self.swap(leftIdx, rightIdx, array)
+            if array[leftIdx] <= array[pivotIdx]:
+                leftIdx += 1
+            if array[rightIdx] >= array[pivotIdx]:
+                rightIdx -= 1
+        self.swap(pivotIdx, rightIdx, array)
+        leftSubarraySmaller = rightIdx - 1 - startIdx < endIdx - (rightIdx + 1)
+        if leftSubarraySmaller:
+            self.quickSortHelper(array, startIdx, rightIdx - 1)
+            self.quickSortHelper(array, rightIdx + 1, endIdx)
+        else:
+            self.quickSortHelper(array, rightIdx + 1, endIdx)
+            self.quickSortHelper(array, startIdx, rightIdx - 1)
 
 
-class HeapSort(SortingAlgorithm):
-    @time_it
+class MergeSort(SortingAlgorithm):
     def sort(self, array):
-        n = len(array)
-        for i in range(n // 2 - 1, -1, -1):
-            self.heapify(array, n, i)
-        for i in range(n - 1, 0, -1):
-            swap(i, 0, array)
-            self.heapify(array, i, 0)
-        return array
+        start_time = time.time()
+        if len(array) <= 1:
+            return array, 0.0
+        auxiliaryArray = array[:]
+        self.mergeSortHelper(array, 0, len(array) - 1, auxiliaryArray)
+        end_time = time.time()
+        return array, end_time - start_time
 
-    def heapify(self, array, n, i):
-        largest = i
-        l = 2 * i + 1
-        r = 2 * i + 2
+    def mergeSortHelper(self, mainArray, startIdx, endIdx, auxiliaryArray):
+        if startIdx == endIdx:
+            return
+        middleIdx = (startIdx + endIdx) // 2
+        self.mergeSortHelper(auxiliaryArray, startIdx, middleIdx, mainArray)
+        self.mergeSortHelper(auxiliaryArray, middleIdx + 1, endIdx, mainArray)
+        self.doMerge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray)
 
-        if l < n and array[largest] < array[l]:
-            largest = l
-        if r < n and array[largest] < array[r]:
-            largest = r
-        if largest != i:
-            swap(i, largest, array)
-            self.heapify(array, n, largest)
+    def doMerge(self, mainArray, startIdx, middleIdx, endIdx, auxiliaryArray):
+        k = startIdx
+        i = startIdx
+        j = middleIdx + 1
+        while i <= middleIdx and j <= endIdx:
+            if auxiliaryArray[i] <= auxiliaryArray[j]:
+                mainArray[k] = auxiliaryArray[i]
+                i += 1
+            else:
+                mainArray[k] = auxiliaryArray[j]
+                j += 1
+            k += 1
+        while i <= middleIdx:
+            mainArray[k] = auxiliaryArray[i]
+            i += 1
+            k += 1
+        while j <= endIdx:
+            mainArray[k] = auxiliaryArray[j]
+            j += 1
+            k += 1
 
 
 class CountingSort(SortingAlgorithm):
-    @time_it
     def sort(self, array):
-        max_element = max(array)
-        min_element = min(array)
-        range_of_elements = max_element - min_element + 1
-        count_arr = [0 for _ in range(range_of_elements)]
-        output_arr = [0 for _ in range(len(array))]
+        start_time = time.time()
+        max_value = max(array)
+        min_value = min(array)
+        range_of_elements = max_value - min_value + 1
+        count_array = [0] * range_of_elements
+        output_array = [0] * len(array)
 
-        for i in range(0, len(array)):
-            count_arr[array[i] - min_element] += 1
+        for num in array:
+            count_array[num - min_value] += 1
 
-        for i in range(1, len(count_arr)):
-            count_arr[i] += count_arr[i - 1]
+        for i in range(1, len(count_array)):
+            count_array[i] += count_array[i - 1]
 
         for i in range(len(array) - 1, -1, -1):
-            output_arr[count_arr[array[i] - min_element] - 1] = array[i]
-            count_arr[array[i] - min_element] -= 1
+            output_array[count_array[array[i] - min_value] - 1] = array[i]
+            count_array[array[i] - min_value] -= 1
 
-        for i in range(0, len(array)):
-            array[i] = output_arr[i]
-        return array
+        for i in range(len(array)):
+            array[i] = output_array[i]
+
+        end_time = time.time()
+        return array, end_time - start_time
+
+
+class HeapSort(SortingAlgorithm):
+    def sort(self, array):
+        start_time = time.time()
+        self.build_max_heap(array)
+        for i in range(len(array) - 1, 0, -1):
+            self.swap(0, i, array)
+            self.max_heap(array, index=0, size=i)
+        end_time = time.time()
+        return array, end_time - start_time
+
+    def build_max_heap(self, array):
+        n = len(array)
+        for i in range(n // 2 - 1, -1, -1):
+            self.max_heap(array, index=i, size=n)
+
+    def max_heap(self, array, index, size):
+        largest = index
+        leftNumber = 2 * index + 1
+        rightNumber = 2 * index + 2
+        if leftNumber < size and array[leftNumber] > array[largest]:
+            largest = leftNumber
+        if rightNumber < size and array[rightNumber] > array[largest]:
+            largest = rightNumber
+        if largest != index:
+            self.swap(index, largest, array)
+            self.max_heap(array, largest, size)
+
+    def heap_sort(self, array):
+        return self.sort(array)
+
+
+class SelectionSort(SortingAlgorithm):
+    def find_min_index(self, array, start):
+        min_index = start
+        for j in range(start + 1, len(array)):
+            if array[j] < array[min_index]:
+                min_index = j
+        return min_index
+
+    def sort(self, array):
+        start_time = time.time()
+        for i in range(len(array)):
+            min_index = self.find_min_index(array, i)
+            self.swap(i, min_index, array)
+        end_time = time.time()
+        return array, end_time - start_time
 
 
 class RadixSort(SortingAlgorithm):
     def sort(self, array):
-        max_element = max(array)
-        exp = 1
-        while max_element // exp > 0:
-            self.count_sort(array, exp)
-            exp *= 10
-        return array
+        start_time = time.time()
+        max_value = max(array, key=abs)
+        num_digits = int(math.log10(abs(max_value))) + 1 if max_value != 0 else 1
 
-    def count_sort(self, array, exp):
-        n = len(array)
-        output = [0] * n
-        count = [0] * 10
+        for digit_place in range(num_digits):
+            counting_sort = CountingSort()
+            sorted_array, _ = counting_sort.sort(array)
+            array = sorted_array
 
-        for i in range(0, n):
-            index = array[i] // exp
-            count[index % 10] += 1
-
-        for i in range(1, 10):
-            count[i] += count[i - 1]
-
-        i = n - 1
-        while i >= 0:
-            index = array[i] // exp
-            output[count[index % 10] - 1] = array[i]
-            count[index % 10] -= 1
-            i -= 1
-
-        i = 0
-        for i in range(0, len(array)):
-            array[i] = output[i]
-
-
-class BucketSort(SortingAlgorithm):
-    def sort(self, array):
-        max_element = max(array)
-        min_element = min(array)
-        range_of_elements = max_element - min_element + 1
-        bucket_arr = [[] for _ in range(range_of_elements)]
-        output_arr = []
-
-        for i in range(0, len(array)):
-            bucket_arr[array[i] - min_element].append(array[i])
-
-        for i in range(0, len(bucket_arr)):
-            bucket_arr[i] = sorted(bucket_arr[i])
-
-        for i in range(0, len(bucket_arr)):
-            for j in range(0, len(bucket_arr[i])):
-                output_arr.append(bucket_arr[i][j])
-        return output_arr
+        end_time = time.time()
+        return array, end_time - start_time
 
 
 all_algorithms = [
@@ -308,35 +353,77 @@ all_algorithms = [
         "description": "Counting sort is a sorting technique based on keys between a specific range. It works by counting the number of objects having distinct key values.",
         "time_complexity": "O(n+k)",
         "space_complexity": "O(n+k)"
-    },
-    {
-        "id": 8,
-        "name": "Bucket Sort",
-        "instance": BucketSort(),
-        "description": "Bucket sort is mainly useful when input is uniformly distributed over a range. For example, consider the following problem. Sort a large set of floating point numbers which are in range from 0.0 to 1.0 and are uniformly distributed across the range.",
-        "time_complexity": "O(n+k)",
-        "space_complexity": "O(n+k)"
     }
 ]
 
 
-def run_callback(args):
-    if not gui.get_input_text():
-        logger("Please enter some numbers")
-        return
-    # if invalid input
+#  Visualizations Utils
 
-    nums = list(map(int, gui.get_input_text().split()))
+
+def analyze_visualization(input_array):
+    sorting_algo = list(map(lambda algo: algo['name'], all_algorithms))
+    efficiency_list = []
+    for selected_algorithm in all_algorithms:
+        output, efficiency = measure_efficiency(selected_algorithm['instance'], input_array)
+        efficiency_list.append(efficiency)
+
+    data = [float(val) for val in efficiency_list]
+
+    # Clear the current plot
+    plt.clf()
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
+    plt.plot(sorting_algo, data, marker='o', linestyle='-')
+    plt.xlabel('Algorithms')
+    plt.ylabel('Time in Seconds')
+    plt.title('Efficiency of Sorting Algorithms')
+
+    # Rotate x-axis labels for better readability
+    plt.xticks(rotation=45, ha='right')  # Rotate by 45 degrees and align to the right
+    # Set the y-axis limits with a specified interval
+    y_min = min(data)
+    y_max = max(data)
+    y_interval = 0.000010
+    plt.ylim(y_min - y_interval, y_max + y_interval)
+
+    # Label data points on the graph
+    for x, y in zip(sorting_algo, data):
+        plt.annotate(f'{y:6f}', (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
+
+    # Show the plot
+    plt.tight_layout()  # Ensure labels are not cut off
+    plt.plot(sorting_algo, data)
+    plt.xlabel('Algorithms')
+    plt.ylabel('Time in Seconds')
+    plt.title('Efficiency of Algorithms')
+    plt.show()
+    return 0
+
+
+def run_callback(args):
+    text = gui.get_input_text()
+    if not is_valid_input(gui.get_input_text()):
+        logger("Please enter valid input")
+        return
+
+    nums = parse_input(text)
 
     for id, checkbox in gui.get_checkboxes().items():
         if checkbox.isChecked():
             # find the algorithm from id
-            logger("Id is " + str(id))
-            logger(all_algorithms[id]['name'])
+            logger("Running " + all_algorithms[id]['name'] + " algorithm")
+            sorted_elements = all_algorithms[id]['instance'].sort(nums)
+            logger("Sorted elements are " + str(sorted_elements))
 
 
 def analyze_callback(args):
-    logger(f"Analyze button clicked from {args}")
+    text = gui.get_input_text()
+    if not is_valid_input(gui.get_input_text()):
+        logger("Please enter valid input")
+        return
+    nums = parse_input(text)
+    analyze_visualization(nums)
 
 
 def show_stats_callback(args):

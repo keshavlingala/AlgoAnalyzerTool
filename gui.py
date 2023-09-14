@@ -1,5 +1,7 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QCheckBox, QPlainTextEdit, QPushButton
+from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QTextEdit, QCheckBox, QPlainTextEdit, QPushButton
+
 
 class SortingApp(QWidget):
     def __init__(self):
@@ -35,11 +37,11 @@ class SortingApp(QWidget):
         layout.addWidget(self.log_box)
 
         self.setLayout(layout)
-        self.setWindowTitle("Sorting App")
+        self.setWindowTitle("Algorithms Efficiency Analyzer Tool")
 
         # Set the window size
-        self.resize(600, 400)
-        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.resize(600, 800)
+        # self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         self.show()
 
     def sample_function(self):
