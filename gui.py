@@ -1,7 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QCheckBox, QPlainTextEdit, QPushButton
 
-
 class SortingApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -13,11 +12,11 @@ class SortingApp(QWidget):
         layout.addWidget(self.text_box)
 
         # 2. List of checkboxes with sorting algorithms
-        sorting_algorithms = ["Bubble Sort", "Insertion Sort", "Quick Sort", "Merge Sort", "Selection Sort"]
         self.checkboxes = {}
-        for algo in sorting_algorithms:
-            checkbox = QCheckBox(algo, self)
-            self.checkboxes[algo] = checkbox
+        from main import all_algorithms
+        for algo in all_algorithms:
+            checkbox = QCheckBox(algo["name"], self)
+            self.checkboxes[algo["id"]] = checkbox
             layout.addWidget(checkbox)
 
         # Button that will run a function when clicked
@@ -53,8 +52,8 @@ class SortingApp(QWidget):
 
     # Utility functions
 
-    def get_selected_checkboxes(self):
-        return [algo for algo, checkbox in self.checkboxes.items() if checkbox.isChecked()]
+    def get_checkboxes(self):
+        return self.checkboxes
 
     def update_checkboxes(self, selected_algorithms):
         for algo, checkbox in self.checkboxes.items():
