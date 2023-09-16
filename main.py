@@ -23,16 +23,29 @@ def time_it(func):
 def is_valid_input(text):
     if not text:
         return False
-    try:
-        list(map(int, text.split()))
-        return True
-    except ValueError:
-        return False
+    if '.' in text:
+        gui.get_checkboxes()[6].setChecked(False)
+        gui.get_checkboxes()[7].setChecked(False)
+        logger('Radix Sort and Counting Sort only work with integers')
+        logger('Removed Radix Sort and Counting Sort from selected algorithms')
+
+    def is_valid_number(s):
+        try:
+            float(s) if '.' in s else int(s)
+            return True
+        except ValueError:
+            return False
+
+    return all(map(is_valid_number, text.split()))
 
 
 def parse_input(text):
     text = text.replace(',', ' ')
-    return list(map(int, text.split()))
+
+    def parse_number(s):
+        return float(s) if '.' in s else int(s)
+
+    return list(map(parse_number, text.split()))
 
 
 def measure_efficiency(sorting_algorithm, input_array):
@@ -495,9 +508,6 @@ def show_stats_callback(args):
         logger("Time Complexity: " + algo['time_complexity'])
         logger("Space Complexity: " + algo['space_complexity'])
         logger("--------------------------------------------------")
-
-
-
 
 
 if __name__ == '__main__':
