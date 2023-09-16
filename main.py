@@ -456,10 +456,13 @@ def combined_visualization(data, labels):
     return 0
 
 
-def analyze_visualization(input_array):
-    labels = list(map(lambda algo: algo['name'], all_algorithms))
+def analyze_visualization(input_array, contains_float=False):
+    algos = all_algorithms
+    if contains_float:
+        algos = all_algorithms[:-2]
+    labels = list(map(lambda algo: algo['name'], algos))
     efficiency_list = []
-    for selected_algorithm in all_algorithms:
+    for selected_algorithm in algos:
         output, efficiency = measure_efficiency(selected_algorithm['instance'], input_array)
         efficiency_list.append(efficiency)
 
@@ -497,7 +500,7 @@ def analyze_callback(args):
         logger("Please enter valid input")
         return
     nums = parse_input(text)
-    analyze_visualization(nums)
+    analyze_visualization(nums, contains_float='.' in text)
 
 
 def show_stats_callback(args):
