@@ -2,6 +2,7 @@ import math
 import sys
 import time
 
+import numpy as np
 from PyQt5.QtWidgets import QApplication
 from matplotlib import pyplot as plt
 
@@ -391,6 +392,57 @@ def show_visualization(labels, data):
     return 0
 
 
+def combined_visualization(data, labels):
+    # Convert data values to float where possible
+    float_data = []
+    valid_labels = []
+    for d, label in zip(data, labels):
+        try:
+            float_val = float(d)
+            float_data.append(float_val)
+            valid_labels.append(label)
+        except ValueError:
+            pass
+
+    # Create a 2x2 grid of subplots
+    fig, axs = plt.subplots(2, 2, figsize=(15, 15))
+
+    # Pie Chart: Using the positive values in float_data as proportions
+    pie_data = [d for d in float_data if d > 0]
+    pie_labels = [label for d, label in zip(float_data, valid_labels) if d > 0]
+    axs[0, 0].pie(pie_data, labels=pie_labels, autopct='%1.1f%%', startangle=90)
+    axs[0, 0].set_title("Pie Chart")
+    axs[0, 0].axis('equal')
+
+    # Histogram: Using all float data values
+    axs[0, 1].hist(float_data, bins=10, color='blue', edgecolor='black')
+    axs[0, 1].set_title("Histogram")
+    axs[0, 1].set_xlabel("Values")
+    axs[0, 1].set_ylabel("Frequency")
+
+    # Scatter Plot: X-axis as indices, Y-axis as float data values
+    scatter_x = np.arange(len(float_data))
+    axs[1, 0].scatter(scatter_x, float_data, color='red', marker='o')
+    axs[1, 0].set_title("Scatter Plot")
+    axs[1, 0].set_xticks(scatter_x)
+    axs[1, 0].set_xticklabels(valid_labels, rotation=45, ha='right')
+    axs[1, 0].set_xlabel("Labels")
+    axs[1, 0].set_ylabel("Data Values")
+    axs[1, 0].grid(True)
+
+    # Bar Plot: Using float data values and valid labels
+    axs[1, 1].bar(valid_labels, float_data, color='green')
+    axs[1, 1].set_title("Bar Chart")
+    axs[1, 1].set_xlabel("Labels")
+    axs[1, 1].set_ylabel("Data Values")
+    axs[1, 1].set_xticklabels(valid_labels, rotation=45, ha='right')
+
+    plt.tight_layout()
+    plt.show()
+
+    return 0
+
+
 def analyze_visualization(input_array):
     labels = list(map(lambda algo: algo['name'], all_algorithms))
     efficiency_list = []
@@ -409,7 +461,8 @@ def run_callback(args):
         return
 
     nums = parse_input(text)
-
+    labels = []
+    data = []
     for id, checkbox in gui.get_checkboxes().items():
         if checkbox.isChecked():
             # find the algorithm from id
@@ -419,6 +472,10 @@ def run_callback(args):
             logger(f"Sorted Elements: {sorted_elements}")
             logger(f"Time Taken: {efficiency}")
             logger("--------------------------------------------------")
+            labels.append(all_algorithms[id]['name'])
+            data.append(efficiency)
+    show_visualization(labels, data)
+    # combined_visualization(labels, data)
 
 
 def analyze_callback(args):
@@ -431,16 +488,28 @@ def analyze_callback(args):
 
 
 def show_stats_callback(args):
-    text = gui.get_input_text()
-    if not is_valid_input(gui.get_input_text()):
-        logger("Please enter valid input")
-        return
+    for algo in all_algorithms:
+        logger(f"--------------------{algo['id']}----------------------------")
+        logger("Algorithm: " + algo['name'])
+        logger("Description: " + algo['description'])
+        logger("Time Complexity: " + algo['time_complexity'])
+        logger("Space Complexity: " + algo['space_complexity'])
+        logger("--------------------------------------------------")
+
+
+
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     gui = SortingApp()
     logger = gui.log_message
+    logger('Welcome to Sorting Algorithms Efficiency Analyzer Tool')
+    logger(
+        'Please enter a list of numbers to sort, and analyze their efficiency. ( Comma Separated or Space Separated )')
+    logger('Select the algorithms you want to run, and click on Run Selected Algorithms button')
+    logger('Click on All Algorithms Efficiency button to see the efficiency of all algorithms')
+    logger('Click on Show Stats button to see the stats of all algorithms')
     gui.on_run_button_clicked(run_callback)
     gui.on_analyze_button_clicked(analyze_callback)
     gui.on_show_stats_button_clicked(show_stats_callback)

@@ -28,10 +28,10 @@ class SortingApp(QWidget):
             self.checkboxes[algo["id"]] = checkbox
             layout.addWidget(checkbox)
         # Button that will run a function when clicked
-        self.run_button = QPushButton("Run Algorithms", self)
+        self.run_button = QPushButton("Run Selected Algorithms", self)
         layout.addWidget(self.run_button)
 
-        self.analyze = QPushButton("Analyze", self)
+        self.analyze = QPushButton("All Algorithms Efficiency", self)
         layout.addWidget(self.analyze)
 
         self.show_stats = QPushButton("Show Stats", self)
