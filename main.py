@@ -1,8 +1,8 @@
 import math
+import random
 import sys
 import time
 
-import numpy as np
 from PyQt5.QtWidgets import QApplication
 from matplotlib import pyplot as plt
 
@@ -21,6 +21,7 @@ def time_it(func):
 
 
 def is_valid_input(text):
+    text = text.replace(',', ' ')
     if not text:
         return False
     if '.' in text:
@@ -405,57 +406,6 @@ def show_visualization(labels, data):
     return 0
 
 
-def combined_visualization(data, labels):
-    # Convert data values to float where possible
-    float_data = []
-    valid_labels = []
-    for d, label in zip(data, labels):
-        try:
-            float_val = float(d)
-            float_data.append(float_val)
-            valid_labels.append(label)
-        except ValueError:
-            pass
-
-    # Create a 2x2 grid of subplots
-    fig, axs = plt.subplots(2, 2, figsize=(15, 15))
-
-    # Pie Chart: Using the positive values in float_data as proportions
-    pie_data = [d for d in float_data if d > 0]
-    pie_labels = [label for d, label in zip(float_data, valid_labels) if d > 0]
-    axs[0, 0].pie(pie_data, labels=pie_labels, autopct='%1.1f%%', startangle=90)
-    axs[0, 0].set_title("Pie Chart")
-    axs[0, 0].axis('equal')
-
-    # Histogram: Using all float data values
-    axs[0, 1].hist(float_data, bins=10, color='blue', edgecolor='black')
-    axs[0, 1].set_title("Histogram")
-    axs[0, 1].set_xlabel("Values")
-    axs[0, 1].set_ylabel("Frequency")
-
-    # Scatter Plot: X-axis as indices, Y-axis as float data values
-    scatter_x = np.arange(len(float_data))
-    axs[1, 0].scatter(scatter_x, float_data, color='red', marker='o')
-    axs[1, 0].set_title("Scatter Plot")
-    axs[1, 0].set_xticks(scatter_x)
-    axs[1, 0].set_xticklabels(valid_labels, rotation=45, ha='right')
-    axs[1, 0].set_xlabel("Labels")
-    axs[1, 0].set_ylabel("Data Values")
-    axs[1, 0].grid(True)
-
-    # Bar Plot: Using float data values and valid labels
-    axs[1, 1].bar(valid_labels, float_data, color='green')
-    axs[1, 1].set_title("Bar Chart")
-    axs[1, 1].set_xlabel("Labels")
-    axs[1, 1].set_ylabel("Data Values")
-    axs[1, 1].set_xticklabels(valid_labels, rotation=45, ha='right')
-
-    plt.tight_layout()
-    plt.show()
-
-    return 0
-
-
 def analyze_visualization(input_array, contains_float=False):
     algos = all_algorithms
     if contains_float:
@@ -487,7 +437,7 @@ def run_callback(args):
             logger("Algorithm: " + all_algorithms[id]['name'])
             logger(f"Sorted Elements: {sorted_elements}")
             logger(f"Time Taken: {efficiency}")
-            logger("--------------------------------------------------")
+            logger("------------------------------------------------------")
             labels.append(all_algorithms[id]['name'])
             data.append(efficiency)
     if len(labels) != 0:
@@ -514,6 +464,12 @@ def show_stats_callback(args):
         logger("--------------------------------------------------")
 
 
+def random_button_clicked(args):
+    random_elements = [random.randint(0, 100) for _ in range(random.randint(10, 25))]
+    text = ','.join(map(str, random_elements))
+    gui.update_text_box(text)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     gui = SortingApp()
@@ -527,5 +483,6 @@ if __name__ == '__main__':
     gui.on_run_button_clicked(run_callback)
     gui.on_analyze_button_clicked(analyze_callback)
     gui.on_show_stats_button_clicked(show_stats_callback)
+    gui.on_random_button_clicked(random_button_clicked)
     sys.exit(app.exec_())
     # App End

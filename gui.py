@@ -15,6 +15,7 @@ class SortingApp(QWidget):
 
         # 1. Text box with padding
         self.text_box = QTextEdit(self)
+        self.text_box.setMaximumHeight(100)
 
         self.text_box.setPlaceholderText(
             "Enter a list of numbers to sort, and analyze their efficiency. ( Comma Separated or Space Separated )")
@@ -37,6 +38,9 @@ class SortingApp(QWidget):
         self.show_stats = QPushButton("Show Stats", self)
         layout.addWidget(self.show_stats)
 
+        self.random_button = QPushButton("Populate Random Numbers", self)
+        layout.addWidget(self.random_button)
+
         # 3. White box for logs
         self.log_box = QPlainTextEdit(self)
         self.log_box.setReadOnly(True)
@@ -55,6 +59,9 @@ class SortingApp(QWidget):
         self.resize(600, 800)
         # self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         self.show()
+
+    def update_text_box(self, text):
+        self.text_box.setPlainText(text)
 
     def sample_function(self):
         selected_algorithms = self.get_selected_checkboxes()
@@ -89,6 +96,8 @@ class SortingApp(QWidget):
     def on_analyze_button_clicked(self, callback):
         self.analyze.clicked.connect(callback)
 
+    def on_random_button_clicked(self, callback):
+        self.random_button.clicked.connect(callback)
     def on_show_stats_button_clicked(self, callback):
         self.show_stats.clicked.connect(callback)
 
