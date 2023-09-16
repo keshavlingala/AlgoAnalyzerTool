@@ -490,7 +490,9 @@ def run_callback(args):
             logger("--------------------------------------------------")
             labels.append(all_algorithms[id]['name'])
             data.append(efficiency)
-    show_visualization(labels, data)
+
+    if len(labels) == 0:
+        show_visualization(labels, data)
     # combined_visualization(labels, data)
 
 
